@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Country School Visiting Team Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a paper ledger. Left rail of views, one reading column, hairline rules, a single warm accent for anything that needs a hand. */
+:root{
+  color-scheme: light;
+  --paper:#f6f3ea; --sheet:#fbf9f3; --ink:#26241f; --muted:#6f6a5e; --rule:#d9d3c3;
+  --accent:#b4532a; --accent-soft:#f1e2d6;
+  --ok:#3f6b4a; --warn:#9a6b12; --ok-soft:#e3ecdf; --warn-soft:#f3e9cf;
+  --serif:"Newsreader","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.5}
+a{color:var(--accent)}
+.wrap{display:grid;grid-template-columns:220px minmax(0,1fr);max-width:1180px;margin:0 auto;gap:0 40px;padding:0 20px}
+header.top{grid-column:1/-1;border-bottom:1px solid var(--ink);padding:26px 0 14px;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;justify-content:space-between}
+header.top h1{font-size:28px;font-weight:500;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.who{display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:12px;color:var(--muted)}
+nav{padding:22px 0;position:sticky;top:0;align-self:start}
+nav a{display:block;padding:5px 0 5px 10px;border-left:2px solid transparent;color:var(--ink);text-decoration:none;font-size:15.5px}
+nav a:hover{color:var(--accent)}
+nav a.on{border-left-color:var(--accent);color:var(--accent)}
+nav .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 4px 10px}
+main{padding:22px 0 80px;min-width:0}
+h2{font-size:25px;font-weight:500;margin:0 0 4px;text-wrap:balance}
+h3{font-size:19px;font-weight:600;margin:30px 0 6px;padding-top:14px;border-top:1px solid var(--rule)}
+h4{font-size:16px;font-weight:600;margin:18px 0 4px}
+p{margin:0 0 10px;max-width:68ch}
+.lede{color:var(--muted);max-width:68ch;margin-bottom:18px}
+.small{font-size:14px;color:var(--muted)}
+.mono{font-family:var(--mono);font-size:12px}
+.num{font-variant-numeric:tabular-nums}
+#banner{grid-column:1/-1;font-family:var(--mono);font-size:12px;padding:7px 10px;margin-top:10px;background:var(--warn-soft);color:var(--warn);border:1px solid var(--rule)}
+#banner:empty{display:none}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;border:1px solid var(--rule);background:var(--sheet);margin:14px 0 6px}
+.tile{padding:12px 14px;border-right:1px solid var(--rule)}
+.tile:last-child{border-right:0}
+.tile b{display:block;font-size:26px;font-weight:500;line-height:1.1}
+.tile span{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}
+.tblwrap{overflow-x:auto}
+.tbl th{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:400;padding:6px 8px 6px 0;border-bottom:1px solid var(--ink)}
+.tbl td{padding:7px 8px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.tbl tr.sec td{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding-top:16px;border-bottom:1px solid var(--rule)}
+.tbl tr.na td{color:var(--muted)}
+.pill{display:inline-block;font-family:var(--mono);font-size:11px;padding:1px 7px;border:1px solid var(--rule);border-radius:10px;white-space:nowrap;background:var(--sheet);color:var(--muted)}
+.pill.go{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.pill.ok{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.fld{margin:14px 0 20px}
+.fld>label,.lbl{display:block;font-weight:600;font-size:16px;margin-bottom:2px}
+.fld .row{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-bottom:4px}
+textarea,input[type=text],select{font-family:var(--serif);font-size:16px;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:2px;padding:8px 10px;width:100%;line-height:1.45}
+textarea{resize:vertical;min-height:70px}
+select{width:auto;max-width:100%;padding:5px 8px}
+textarea:focus,input:focus,select:focus,button:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+textarea:disabled,input:disabled,select:disabled{color:var(--muted);background:transparent}
+.meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px;min-height:15px}
+details.guide{margin:4px 0 6px;border-left:2px solid var(--accent);padding-left:12px}
+details.guide summary{cursor:pointer;font-family:var(--mono);font-size:11.5px;color:var(--accent);letter-spacing:.03em;list-style:none}
+details.guide summary::before{content:"+ "}
+details.guide[open] summary::before{content:"\2212  "}
+details.guide summary::-webkit-details-marker{display:none}
+details.guide .g{font-size:15px;padding:6px 0 4px;max-width:70ch}
+details.guide .g ul,details.guide .g ol{margin:4px 0 8px;padding-left:20px}
+details.guide .g li{margin-bottom:3px}
+.q{border-left:1px solid var(--rule);padding-left:12px;color:var(--muted);font-style:italic;margin:6px 0}
+button{font-family:var(--mono);font-size:12px;padding:6px 11px;border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:2px;cursor:pointer}
+button:hover{background:var(--ink);color:var(--paper)}
+button.pri{border-color:var(--accent);color:var(--accent)}
+button.pri:hover{background:var(--accent);color:#fff}
+button.x{border:0;color:var(--muted);padding:2px 6px}
+button.x:hover{background:transparent;color:var(--accent)}
+button:disabled{opacity:.45;cursor:default}
+.item{border:1px solid var(--rule);background:var(--sheet);padding:10px 12px;margin:8px 0}
+.item .hd{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cites{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin-top:8px}
+.cites label{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block}
+.cites input{font-size:14.5px;padding:5px 8px}
+.chk{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--rule)}
+.chk input{margin-top:6px;accent-color:var(--accent)}
+.chk .d{font-family:var(--mono);font-size:12px;color:var(--muted);min-width:92px;padding-top:3px}
+.chk.done .t{color:var(--muted);text-decoration:line-through}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin:12px 0}
+.card{border:1px solid var(--rule);background:var(--sheet);padding:12px 14px}
+.card b{font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.chip{font-family:var(--mono);font-size:11px;border:1px solid var(--rule);border-radius:10px;padding:2px 8px;background:transparent;color:var(--muted);cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip:hover{background:var(--accent-soft);color:var(--accent)}
+.std{background:var(--sheet);border:1px solid var(--rule);padding:12px 14px;margin:8px 0}
+.std p{max-width:none}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.tabs a{font-family:var(--mono);font-size:12px;padding:4px 10px;border:1px solid var(--rule);text-decoration:none;color:var(--ink);border-radius:2px}
+.tabs a.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.ssbody{max-height:420px;overflow:auto;border:1px solid var(--rule);background:var(--sheet);padding:4px 14px;margin-top:8px}
+.sspage{border-bottom:1px solid var(--rule);padding:8px 0}
+.sspage p{max-width:none;font-size:15.5px}
+.note{border:1px solid var(--accent);background:var(--accent-soft);padding:10px 14px;margin:12px 0;font-size:15.5px;max-width:74ch}
+@media (max-width:820px){
+  .wrap{grid-template-columns:1fr;gap:0}
+  nav{position:static;display:flex;flex-wrap:wrap;gap:2px 14px;padding:12px 0;border-bottom:1px solid var(--rule)}
+  nav .grp{display:none}
+  nav a{border-left:0;border-bottom:2px solid transparent;padding:3px 0}
+  nav a.on{border-bottom-color:var(--accent)}
+  .tile{border-right:0;border-bottom:1px solid var(--rule)}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">CAIS Accreditation Visit &middot; March 14&ndash;17, 2027 &middot; Confidential to the Visiting Team</div>
+      <h1>The Country School Visiting Team Workspace</h1>
+    </div>
+    <div class="who" id="who"></div>
+  </header>
+  <div id="banner"></div>
+  <section id="gate" hidden style="grid-column:1/-1;padding:30px 0 80px;max-width:560px"></section>
+  <nav id="nav" aria-label="Workspace views"></nav>
+  <main id="main"></main>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+"use strict";
+const STANDARDS = [{"n": 1, "title": "Mission, Purpose, and Values", "std": "The school has a clearly articulated mission statement and, as relevant, related statements of purpose and values, formally adopted by the Board of Trustees, that define its purpose, core values, and commitment to inclusion, equity, and belonging and that inform all major planning and decision-making.", "ind": ["The mission statement and related statements of purpose and values are functional documents in the life of the school, regularly used as benchmarks in planning and decision-making, thus providing direction and coherence to school operations and growth, as well as a foundation upon which priorities are based.", "The mission and related statements of purpose and values are broadly available, understood, and supported by the diverse constituencies of the school.", "The mission and related statements of purpose and values reflect the school’s position on inclusion, equity, and belonging.", "These statements are a force for continuing school improvement.", "These statements are key components of the school’s marketing, admission, and hiring activities.", "There is a policy or practice of periodically reviewing the mission statement and related statements of purpose and values for currency and relevance, and there is a process for making changes to them. This process occurs minimally once within each accreditation cycle and includes the active involvement of the Board of Trustees."]}, {"n": 2, "title": "Educational Program", "std": "Guided by the mission, the school clearly defines its curricular and co-curricular programs and provides coherent documentation of them. The programs are regularly evaluated, updated, and strengthened to stay current with relevant educational research, to ensure the equity and integrity of the intended outcomes in student learning, and to prepare students for an inherently diverse world.", "ind": ["The faculty and administration actively engage in an ongoing process of curricular and co-curricular reflection, review, and evaluation across grade levels and subject areas to improve student learning.", "There is clear evidence of ongoing instructional planning.", "The curriculum has a coherent and discernable structure that supports students in their learning and guides faculty decision-making.", "Instructional resources are appropriate to the needs of the educational program.", "Faculty and academic administrators regularly undertake professional development activities to keep them current in educational research and best practices bearing on academic program content and design.", "The curricular and co-curricular programs address the cognitive, social–emotional, physical, and creative needs of the students in accordance with the school’s mission.", "The curriculum is designed to support multiple perspectives and identities, and it engages, challenges, and reflects all learners enrolled at the school.", "The design and evaluation of the curricular program take into account that the school’s graduates will grow up and live in a world that requires understanding and leadership to successfully address complex multicultural, global, environmental, and technological realities."]}, {"n": 3, "title": "The Student Learning Experience", "std": "The school maintains a vigorous and informed focus on the learning of each student. It has policies, expectations, procedures, assessment systems, and student feedback mechanisms that enable it to engage—and maximize the learning potential of—each student within an inclusive and equitable environment that fosters belonging.", "ind": ["The school has a clear published statement that communicates its fundamental beliefs and assumptions about how students best learn along with an explanation of what those beliefs and assumptions are based upon.", "The school has developed procedures to help students understand how they learn and how they can improve their ability to learn.", "The faculty and administration are attuned to and recognize differences in learning profiles, abilities, and approaches among students, including different levels of access to resources and support that may be influenced by factors related to a student’s background or identity.", "The school has developed a thoughtful, in-depth, and multi-faceted system of student assessment, which compels teachers and administrators to gather and analyze important evidence regarding each student’s learning and to implement strategies that will help each student to reach their potential.", "There are established structures and time allotments for teachers to meet at regularly scheduled intervals and review the achievement and engagement of individual students and groups of students.", "The school has established procedures to regularly inform parents about student progress. (Note that “parent” is defined in the glossary.)", "There is an age-appropriate system in place for counseling students (and, when necessary, parents) regarding academic and social issues.", "There are established procedures that the school uses to help students who struggle with learning, and there are resources available (within and beyond the school) to the faculty and administration to assist them in identifying and meeting the learning needs of individual students.", "The school has a process in place to identify students whom it can no longer serve effectively and to counsel them in a supportive and dignified way regarding more suitable schooling options.", "The school has a structured, ongoing process through which it solicits and analyzes the perspectives of students and alumni/ae about their experience of the school, and it uses the information from this process to strengthen the school and improve learning.", "The school actively strives to create a daily schedule and an annual calendar that allow for students to be productively challenged and engaged while avoiding structures and practices that lead to unmanageable student workloads and debilitating stress.", "Students themselves express a high level of enthusiasm for and engagement with their academic work in particular and their school experience in general.", "Parents generally observe and report that their children have a high level of interest and engagement in learning at the school.", "Age-appropriate opportunities are in place for students to provide feedback on their experience of the teaching and learning environment of the school."]}, {"n": 4, "title": "Faculty and Pedagogy", "std": "The school has a clear set of criteria for teacher effectiveness that reflects its mission, its pedagogical goals, and its commitment to inclusion, equity, and belonging. Those criteria inform hiring, professional growth, and evaluation. Through regular assessment of pedagogical effectiveness, which includes student learning outcomes, the school seeks to strengthen teaching and learning.", "ind": ["Teachers align their instruction with the core values and ethos of the school, and they embrace its mission and goals.", "The educational background, professional experience, and training of faculty members qualify them for the specific teaching responsibilities to which they are assigned.", "The faculty support and work constructively with each other and the administration in achieving the school’s goals for teaching and learning.", "Faculty members pursue ongoing personal and professional growth.", "A regular faculty evaluation process is consistent, equitable, well-defined, and broadly understood and supported by the faculty.", "Teachers work collaboratively and actively pursue building positive relationships with their students and with other adults in the school community.", "Faculty members actively engage in the ongoing review of program and pedagogy and in the design and development of innovations and improvements in teaching and learning practices.", "The school has written, published learning expectations across grade levels and subject areas.", "There is thorough, comprehensive, and secure cumulative record-keeping in place for the documentation of student progress."]}, {"n": 5, "title": "Climate and Community", "std": "The school maintains a healthy culture that supports the learning and personal growth of each student and is sustained through highly effective communication. The school's commitment diversity, equity, inclusion, and belonging is manifested in its climate and is evident in the engagement of the school community.", "ind": ["The school regularly assesses school climate through an inclusive process in order to gauge and improve the health of the community.", "Employee–administration communications and relationships are open, respectful, and productive across diverse groups within the school community.", "In its communications to parents, other school constituencies, and the wider community, the school seeks to ensure understanding of the school’s mission and to inspire a sense of belonging and constructive involvement in the life of the school.", "Alumni/ae across different demographic groups and their parents—as well as other constituencies beyond parents of current students—are actively informed about, appropriately engaged in, and supportive of the school.", "In the context of its mission, the school actively promotes equity and inclusion, and students experience the school as a safe, equitable, and inclusive place.", "The school is committed to identifying and responding to the needs of the full and diverse spectrum of its students and employees.", "Morale is high and attrition is low across all demographic groups of students and employees. The school collects and uses data to address inconsistencies between groups.", "School communication is highly effective and accessible throughout the school community.", "Students, staff, and parents are strong advocates of the school.", "There is an effective, equitable, and accessible process by which families are informed of and educated about policies and practices of the school.", "The school’s policies include explicit protocols to address bias.", "There is a positive culture of problem-solving and institutional resilience evident in the faculty, staff, and administration of the school."]}, {"n": 6, "title": "Residential Life", "std": "The residential life program of the school is designed and structured to reflect the school’s mission, to complement school programs, and to ensure a safe environment that fosters inclusion, equity, and belonging and contributes to student personal and social growth.", "ind": ["There are clearly defined responsibilities for the residential staff, who are well-trained and highly qualified. Staff training is based on an explicit set of values and goals that include, but are not limited to, safety, inclusion, equity, and belonging in the boarding student experience.", "Members of the faculty, administration, and staff understand and are capable of serving in loco parentis on behalf of boarding students and are appropriately aware of and sensitive to residents’ cultures, traditions, and identities.", "There are well-developed, equitable, accessible, and inclusive residential policies that are consistently applied, regularly reviewed, and reflect the dignity and identities of boarding students.", "Facilities are safe and well-maintained, and equitable access is provided to all residents.", "Supervision practices effectively support the safety and belonging of students across all demographic groups and identities, both on and off campus.", "There is an effective, equitable, and accessible process for students to become knowledgeable about the residence program.", "Thoughtful programming and activities for students after class hours and on weekends are mission-driven, provide a clear rationale based on the school’s priorities for social development, and reflect the identities of all students.", "There is positive and meaningful connection between boarding and day students based on a sense of respect and belonging that is fostered by their shared experiences of school life.", "The residential community thrives in a climate of trust, care, honesty, and collaboration that is evident in the experiences of all students."]}, {"n": 7, "title": "Preschool", "std": "The preschool offers a high-quality and developmentally, culturally, and linguistically appropriate program for young children that fosters independence, belonging, and socialization in a stimulating, safe, and caring environment. The social, emotional, physical, and cognitive development of children is supported by a qualified, nurturing staff of early-childhood educators.", "ind": ["Play is a foundational component of the program.", "Children, parents, and employees look forward to school each day and feel a sense of community and belonging.", "The preschool’s facilities and equipment are clean, safe, and well-maintained, and access is provided in an equitable manner.", "Early-childhood teachers and staff members are well-qualified for their positions, and adult staffing ratios are appropriate.", "The program is developmentally, culturally, and linguistically appropriate and aligned with the mission and philosophy of the school.", "The program addresses the social, emotional, physical, and cognitive needs of the child in a culturally responsive manner.", "Teachers understand and utilize instructional practices that take into account individual and group settings and varying learning profiles and needs.", "Teachers engage with children in ways that promote trust and demonstrate their care in a developmentally, culturally, and linguistically appropriate way.", "The indoor and outdoor environments reflect the developmental needs of each age group.", "The education and inclusion of parents is an important part of the program.", "The school provides professional development for teachers and staff members about best practices, current research, and effective pedagogy in early-childhood education.", "There is a clear and equitable policy about admission to the preschool and its relationship to possible matriculation into succeeding grade levels at the school."]}, {"n": 8, "title": "Admission and Enrollment", "std": "The school has published, consistently applied admission and financial aid policies and procedures that demonstrate a commitment to access and diversity and that are consistent with the school’s mission. The admission process identifies students and families who are well-matched to the school’s values and program. Admission practices are mission-driven and designed to support the financial sustainability of the school while actively promoting socioeconomic diversity.", "ind": ["The school is meeting its targets for enrollment.", "Student attrition is low, there is a process for understanding why students leave, and there are protocols for addressing attrition.", "The school complies with all of the provisions of the CAIS Fundamental Membership Requirements that govern admission and financial aid policies, processes, and procedures.", "The school has clear, published criteria for the allocation of need-based financial aid (in addition to other forms of financial aid, if they exist).", "Applicant families are provided information that clearly defines the program, communicates the total costs of attending the school, and identifies the school’s expectations of students and families.", "The school has explicit, published policies with respect to considering applicants who may be prioritized for any reason, such as a) siblings of currently enrolled students, b) children of alumni/ae, or c) children of school employees.", "Admission personnel are actively involved in marketing and public relations activities that promote the school and generate inquiries and applications.", "The school has in place admission and financial aid policies and practices that are inviting and welcoming to the broadest possible range of applicant families suited to the mission of the school.", "Admission documents make clear the school’s positions on inclusion, equity, and the diversity of the community."]}, {"n": 9, "title": "Finance", "std": "The school has annual operating budgets sufficient to support the school program, plant, operations, and personnel, as well as a financial forecast to support the school’s mission for three years or more. The school’s finances undergo regular review by the Board of Trustees and ensure the long-term sustainability of the institution. School finances are well managed by qualified personnel, appropriately documented, and in compliance with all applicable regulatory and legal requirements.", "ind": ["The school’s policies, procedures, and practices are in general compliance with the standards of the Financial Accounting Standards Board (FASB) (http://www.fasb.org/home).", "The school has written comprehensive financial policies, including those that address risk-management issues.", "The school has budget policies and practices that are consistent and well documented, and it has a documented annual operating budget formally adopted by the Board.", "The school has personnel specifically trained in finance, accounting, and non-profit business operations, including training in equity issues in business operations.", "The school has regular audits or reviews in compliance with CAIS Fundamental Membership Requirements.", "The school has a philosophy and practice of compensation that is effective in attracting and retaining qualified personnel and meeting equity goals.", "Tuition, fundraising, and other revenues are sufficient to cover annual operating expenses.", "The school has a documented, multi-year financial strategy.", "The school has a policy and practice of building financial reserves for long-term facilities needs and unforeseen financial emergencies."]}, {"n": 10, "title": "Advancement", "std": "Consistent with its mission and proportional to its needs and resources, the school implements a comprehensive program of fundraising, marketing, communications, constituency support, and community relations to attain its goals and ensure its future viability in ways that support inclusion, equity, and belonging.", "ind": ["The school has a comprehensive plan and set of strategies for its fundraising initiatives, ensuring the coordination of planning and implementation efforts to maximize support for institutional needs.", "There are school personnel with appropriate training, developed skills, and specific responsibilities for institutional fundraising activities, which includes training to support inclusion, equity, and belonging.", "The school has a well-planned and executed annual fund program that draws upon Board leadership, volunteer dedication, and staff expertise to ensure high constituency participation levels and meaningful funding totals.", "The school has a robust major gifts program, which has led to the successful identification and cultivation of donors who have the capacity to make lead gifts to the institution.", "The school is able to raise significant amounts of money for capital and endowment campaigns.", "A planned giving program is established, and the school has secured commitments from donors who have identified the school as a future beneficiary of their estates.", "The school maintains positive relationships with and garners support from key constituencies, including trustees, current parents, alumni/ae, alumni/ae parents, extended family members, foundations, corporations, and friends.", "The Advancement Office takes the lead in connecting the school with the broader community. Communications and marketing are supported effectively by the school’s website, publications, and social media presence.", "The Advancement Office and Business Office work collegially and systematically on recording gift records and restrictions."]}, {"n": 11, "title": "Human Resources", "std": "The school maintains positive working conditions, appropriate compensation, and equitable and consistent personnel policies—including hiring, onboarding, and evaluation practices. A collaborative and inclusive culture with open communication is fostered to create an optimal environment for the school community.", "ind": ["The school has an effective employee organizational structure for achieving the school’s mission, carrying out school policy, and conducting the program of the school.", "The school has a published employee handbook or personnel policies manual that is provided to all employees. These policies are regularly reviewed to ensure equity.", "Salaries and benefits are sufficiently competitive with local-region peer independent schools—as well as with other private and public schools—to attract and retain qualified personnel. Salaries are regularly reviewed to ensure equity and are in compliance with relevant law.", "Employee benefits are understood by employees and meet all legal requirements and regulations.", "There is a sufficient number of administrators, faculty, and staff to carry out the program of the school, to ensure the supervision, safety, and health of the students, and to maintain financial sustainability.", "Onboarding for new employees is robust and up to date and differentiated for those who are new to independent schools.", "The school ensures that all assignments for faculty and staff are appropriate in terms of their education, training, and experience.", "There are structured opportunities for faculty and staff to be appropriately involved in institutional planning and decision-making.", "There is an understood process for employees to express work-related concerns to their supervisor or other appropriate school personnel.", "There are regularly accessible and funded opportunities for the continuing professional education of employees and a process to ensure such opportunities are equitably distributed.", "A regular employee evaluation process is consistent, well-defined, and broadly understood and supported by those who work at the school.", "Decisions affecting the faculty and staff are consistent with the school’s own employee handbook and written personnel policies.", "The school’s recruitment and employment policies and practices are consistent with all applicable labor laws and regulations, and they comply with the CAIS Fundamental Membership Requirements.", "Supportive, professional working conditions and clear, transparent decision-making and communications contribute to positive employee morale."]}, {"n": 12, "title": "Facilities: Buildings and Grounds", "std": "The physical plant supports and enhances the mission of the school and enables the school to implement its program effectively. The physical plant is a safe, well-maintained, secure, and healthful environment that supports the school’s commitment to inclusion and equity. The school is regularly attentive to the physical plant, creating and executing plans for the current maintenance and future development of the facilities in support of the mission and programs.", "ind": ["Instructional facilities—including space, furnishings, and areas for recreation and play—are age-appropriate, support the educational program, and support the school’s values.", "Sufficient personnel and financial resources are devoted to plant maintenance and repair. An equitable process is in place for the allocation of resources to facilities issues.", "The school engages in a comprehensive, long-term facilities planning process on a regular basis and has a published plan for the renewal, repair, and replacement of the facilities.", "The school complies with applicable local, state, and federal requirements for such considerations as fire, health, safety, access, sanitation, toxic substances, and emergency preparedness.", "Independent of regulatory requirements, the school itself has a process for the identification and reporting of unsafe, exclusionary, discriminatory, or problematic conditions in the physical plant.", "The school has comprehensive emergency plans and regularly reviews its safety procedures.", "The school manages its traffic and parking in ways that are controlled, safe, and respectful of the surrounding community.", "There is appropriate signage on campus so that personnel, students, and visitors feel welcomed and are able to navigate the campus safely and easily. Input is actively solicited from all constituencies about their experience of signage, campus layout, and statues or monuments.", "The school mitigates its environmental impact, with ongoing efforts aimed at measurable reductions in energy use, water consumption, and waste production.", "There is a reporting process in place to address needed repairs, safety issues, equitable space and resource allotment, and maintenance concerns with regard to the physical plant."]}, {"n": 13, "title": "Health, Safety, and Wellness", "std": "The school has established and effectively implemented policies and procedures that promote the health and safety of students and adults on campus and at off-campus school events. The school complies with all relevant legal and regulatory requirements in this regard, and it takes responsibility for educating community members and for implementing policies, habits, and practices that encourage and sustain individual and community wellness.", "ind": ["All employees understand that the supervision of students to ensure their safety and well-being is a priority in all on-campus and school-related settings at all times.", "The school has written procedures to deal with injury, illness, and crisis that are clearly communicated to school personnel, parents, and students.", "The school provides adequate instruction and supervision to reduce hazards to physical and psychological health and safety.", "Adequate provisions are made to care for the health and safety of students while involved in school activities on and off campus. These provisions take into account the diverse needs of students.", "Sufficient resources, both human and financial, are allocated to the essential work of maintaining the physical and psychological health and safety of students.", "The school provides a health insurance program for its employees, and it creates a work environment that actively promotes physical and psychological wellness for the members of the faculty, administration, and staff.", "There is a regular, systematic review of safety procedures and practices that includes consideration of changing policies and expectations in public schools and other relevant institutions.", "The school is in full compliance with all applicable local, state, and federal safety and health codes and regulations, including required training for employees.", "The school has clearly communicated and widely disseminated policies and procedures in place to prevent and respond to child abuse."]}, {"n": 14, "title": "Governance", "std": "The school has an active, engaged, and committed governing Board composed of members whose collective and individual strengths and diverse perspectives support and advance the mission, values, and strategic initiatives of the school. The Board of Trustees clearly understands and acts on its responsibilities, ensuring that its size, composition, and practices enable it to function effectively and guard against conflicts of interest, whether personal or business- related. The Board engages in ongoing professional development to understand its role, the school’s mission and values, and the strategic issues facing the school. The Board of Trustees sets and safeguards the mission, and it hires, evaluates, and supports the Head of School. The Board also ensures that the school acquires the financial resources necessary for its success, and it strategically plans for the school’s future.", "ind": ["The Board is aware of and acts on its responsibility to regularly review the mission and to update it as necessary.", "The Board ensures that it operates in compliance with applicable laws and regulations, maintains appropriate and updated bylaws, and has its members abide by a conflict-of-interest policy.", "The Board takes responsibility for systematic planning for the current and future financial health of the school, and it establishes and oversees the annual operating budget.", "The Board plays a leadership role in ensuring the success of the school’s fundraising programs through its individual and collective efforts to strategize, donate, and solicit.", "The Board takes steps to educate itself about inclusion, equity, and belonging, including the impact of race, ethnicity, and other socially significant factors on strategic decision-making.", "The Board develops and implements a thoughtful, thorough, and equitable process for the selection of the Head of School, using consulting resources as needed, while taking into account the school’s mission, its challenges and opportunities and input from the school community about effective leadership for the future.", "The Board and Board Chair make it a priority to develop and maintain a mutually supportive working relationship with the Head of School, mindful of the differences between the Head’s and the Board’s responsibilities, while using a systematic process for Head evaluation to assist with this work.", "The Board undertakes systematic comprehensive planning on a periodic basis, establishes the major strategic priorities for the school, and takes the lead in implementing Board-level initiatives that follow from those priorities.", "The Board operates as an independent entity—or with functional independence within a larger organization. It has a clearly defined process for its perpetuation, and it has established leadership succession procedures and practices.", "The Board conducts a comprehensive program for new member orientation and ongoing Board education, staying abreast of evolving best practices in independent school governance.", "The Board is knowledgeable about the school, and it systematically gathers, analyzes, and uses data to make important decisions.", "The Board has a clearly understood and regularly used process for evaluating its own effectiveness, individually and collectively, as well as the value and effectiveness of its composition and committee or task force structure.", "The Board has a clearly documented committee or task force structure with specified responsibilities and projects for each.", "The Board itself helps the school community to understand the scope of its responsibilities and the necessary differences between Board and administrative authority, responsibilities, and purview.", "There is a documented job description for individual trustees and for the Board as a whole, which includes standards and expectations for attendance, participation, financial support, professional development, and committee or task force involvement."]}, {"n": 15, "title": "Administration", "std": "The administration effectively leads the school in assessing, planning, and innovating as well as in managing the educational program and the overall operations of the school. The administration takes responsibility for establishing and maintaining a healthy, collaborative, and supportive environment for teaching and learning. It actively promotes ongoing improvement of programs and continuous attention to inclusion, equity, and belonging.", "ind": ["The school’s administrative leaders, working in collaboration with the Board, prepare for the next stage of growth, help to organize strategic planning processes, and plan for resources needed in the future.", "The school’s administrative leaders provide direction and deploy resources to sustain and improve curricular and co-curricular programs and to make the student learning experience as positive as possible for students, with deliberate consideration of inclusion, equity, and belonging.", "The Head of School, who is qualified by education, experience, and abilities, effectively articulates a shared educational vision and embodies the values of the school in their work.", "The members of the school’s administrative team are qualified by education, experience, and abilities to carry out the duties and responsibilities which are delegated to them and to support the school’s efforts toward institutional improvement.", "The administrative team undertakes professional development focused on best practices in schools, including those practices related to diversity, inclusion, equity, and belonging.", "Opportunities are provided for administrators, faculty, and staff to be involved in the planning and decision-making processes concerning professional development activities.", "The administration ensures that there are communication channels accessible to all demographic groups within the community of students, parents, faculty, and staff to offer suggestions and voice concerns.", "The Head and administration work effectively together, both individually and as a team, modeling the kinds of collaborative professional relationships they seek in employees.", "The Head makes it a priority to develop and sustain a mutually supportive working relationship with the Board Chair and Board members.", "The Head and administration communicate effectively with one another and with the faculty and staff. The faculty and staff experience this communication as being regular, reliable, open, honest, and effective."]}, {"n": 16, "title": "Self-Assessment, Decision-Making, and Change", "std": "The school regularly engages in assessment practices that include the collection, analysis, and effective use of relevant data. This data is employed in evaluating the school’s educational programs, school operations, and initiatives to support a climate of inclusion, equity, and belonging. The school readily identifies and promotes changes in a manner that marshals sufficient resources and garners the community support necessary for successful implementation and continuous improvement.", "ind": ["Student performance data gathered about student learning is used to inform ongoing instruction, program review, and revision.", "The staff has a clear role in organizing and providing useful data indicators of school health and effectiveness.", "Board members and staff are experienced and adept in the use of data in decision-making.", "Avenues are created for students, parents, school personnel, and alumni/ae to provide feedback on the school’s effectiveness and considerations for improvement and change.", "Data gathered about student learning guide a systematic professional development program designed to achieve continuous improvement.", "Major change initiatives are a) based upon the analysis of relevant data, b) carefully planned, c) guided by the school’s mission, d) communicated to constituencies, and e) monitored through an accountability plan.", "The school has a practice of disaggregating data, when relevant, to explore how students, families, faculty, and staff members of different demographic groups learn and experience the school community.", "The school additionally uses data from external sources to understand social, demographic, economic, and other trends and to inform its decision-making.", "There is broad appreciation within the school of the importance of a strong capacity for institutional self-awareness and of sustained engagement with the understandings that such awareness provides."]}];
+const VISIT_START = new Date(2027,2,14);
+const TEAM = {
+  cecee:{name:"Cecee",role:"Chair",lens:"Has held every administrative role at a small school; years on visiting committees."},
+  tamar:{name:"Tamar",role:"Member",lens:"Academic program, middle school, faculty growth and evaluation."},
+  amy:{name:"Amy",role:"Member",lens:"Early childhood, primary grades, community and family partnership."},
+  jeff:{name:"Jeff",role:"Member",lens:"Finance, human resources, facilities, risk."},
+  jim:{name:"Jim",role:"Member",lens:"Governance, enrollment, advancement, headship."}
+};
+const SECTIONS = [
+  {n:1,rom:"I",title:"Institutional Purpose and Core Values",ch:[1],lead:"cecee"},
+  {n:2,rom:"II",title:"Teaching and Learning",ch:[2,3,4,5,6,7],lead:"tamar"},
+  {n:3,rom:"III",title:"Financial Sustainability",ch:[8,9,10],lead:"jim"},
+  {n:4,rom:"IV",title:"Operations",ch:[11,12,13],lead:"jeff"},
+  {n:5,rom:"V",title:"Institutional Stewardship and Leadership",ch:[14,15],lead:"jim"},
+  {n:6,rom:"VI",title:"Institutional Improvement and Sustainability",ch:[16],lead:"cecee"}
+];
+const NA = {6:"The Country School is a day school, so the Residential Life standard should not apply. Confirm in the Portal."};
+const PROPOSED = { // lead, second reader
+  front:["cecee","jim"],1:["cecee","jim"],2:["tamar","amy"],3:["tamar","amy"],4:["tamar","cecee"],5:["amy","tamar"],7:["amy","tamar"],
+  8:["jim","jeff"],9:["jeff","jim"],10:["jim","jeff"],11:["jeff","cecee"],12:["jeff","amy"],13:["amy","jeff"],14:["jim","cecee"],15:["cecee","jim"],16:["cecee","tamar"]
+};
+const STATUSES = ["Not started","Reading","Questions posted","Drafting","Ready for chair","Final"];
+const RATINGS = ["","Highly effective","Effective","Somewhat effective","Minimally effective"];
+const MILESTONES = [
+ {ph:"Getting organized (now through winter break)"},
+ {id:"m01",d:"Nov 20",who:"Chair",t:"Send the welcome note and the link to this workspace."},
+ {id:"m02",d:"Dec 4",who:"Team",t:"Pick your name at the top of this page, mark the chapters you would like in Team and assignments, and read the Visiting Committee instructions (Reference)."},
+ {id:"m03",d:"Dec 4",who:"Chair",t:"Agree on the team's AI plan with Holly Novick, including whether the school is comfortable with the self-study being used in non-training AI tools. Record it in AI guidelines."},
+ {id:"m04",d:"Dec 11",who:"Chair",t:"Confirm chapter assignments here and assign chapters in the CAIS Accreditation Portal."},
+ {id:"m05",d:"Dec 15",who:"School",t:"Self-study due in the Portal (date from the current CAIS protocol; confirm with the school)."},
+ {id:"m06",d:"Dec 17",who:"All",t:"45-minute kickoff call: introductions, how this workspace works, calendar, questions."},
+ {id:"m07",d:"Undated",who:"Team",t:"Attend a CAIS team member training session (dates are on the CAIS website)."},
+ {ph:"Reading (January)"},
+ {id:"m08",d:"Jan 8",who:"Team",t:"Log in to the Portal, open the self-study, and use Generate PDF so everyone cites the same page numbers."},
+ {id:"m09",d:"Jan 29",who:"Team",t:"Read the whole self-study once. Put reading notes on your assigned chapters."},
+ {id:"m10",d:"Jan 29",who:"Chair",t:"Check in with the Head and Self-Study Coordinator: draft schedule, private work room, computer and clerical support, housing and travel."},
+ {ph:"Pre-writing (February)"},
+ {id:"m11",d:"Feb 12",who:"Team",t:"Post written questions for each of your chapters: issues, concerns, clarifications, evidence to pursue on campus."},
+ {id:"m12",d:"Feb 19",who:"Chair",t:"Share the draft visit schedule with the team."},
+ {id:"m13",d:"Feb 26",who:"Team",t:"Draft context statements for your section and list tentative notable strengths. Ratings wait for the visit."},
+ {id:"m14",d:"Mar 2",who:"All",t:"Second team call: trends in the self-study, concerns, who meets with whom on campus."},
+ {id:"m15",d:"Mar 5",who:"Chair",t:"Final logistics note: first meeting time, hotel, travel, and a reminder to bring a card or cash for reimbursable expenses."},
+ {ph:"The visit (Sunday March 14 to Wednesday March 17)"},
+ {id:"m16",d:"Mar 14",who:"All",t:"Arrive. Orientation meeting before the first meeting with the school."},
+ {id:"m17",d:"Mar 15–16",who:"All",t:"Meetings, classroom visits, evening drafting. Strengths, recommendations, ratings and rationales drafted by Tuesday night."},
+ {id:"m18",d:"Mar 16–17",who:"All",t:"Review all 16 standards together. Discuss and vote on the recommended status. This happens in the room and in the Portal, never in this workspace."},
+ {id:"m19",d:"Mar 17",who:"Chair",t:"Preview the report with the Head, revise, present to the school community, and leave. No copy of the report stays at the school."},
+ {ph:"After the visit"},
+ {id:"m20",d:"Mar 19",who:"Team",t:"Send expense vouchers to the school."},
+ {id:"m21",d:"Mar 27",who:"Chair",t:"Submit the final report and the confidential Recommendation for Status of Accreditation in the Portal (due within 10 days of the visit)."},
+ {id:"m22",d:"Mar 27",who:"Chair",t:"Complete the CAIS AI use form."}
+];
+const SCHED_DEFAULT = {
+ sun:"3:00  Team arrives at the hotel\n3:30  Orientation meeting: purpose of the visit, how status is decided, trends in the self-study, how we gather evidence, review of the schedule\n5:00  Dinner",
+ mon:"7:45  Breakfast with faculty\n8:15  Watch arrival\n9:00  Campus tour\n11:00 Team work time\n12:00 Working lunch in pairs: students, parents\n1:00  Section II groups / Section III groups (finance, development, admission)\n3:00  Head of School\n3:45  Steering Committee\n5:00  Working dinner and drafting",
+ tue:"7:30  Breakfast with the Board\n8:30  Team work time and classroom visits\n10:30 Technology and library; admission\n12:00 Working lunch with preschool and lower school faculty\n1:10  Staff\n1:40  Team work time\n3:15  Middle school faculty\n4:00  Any remaining groups (Sections IV, V, VI)\n6:00  Working dinner. Finish drafts, review the 16 standards.",
+ wed:"Morning  Finish the report\n11:30 Chair previews the report with the Head (ratings and rationales are read to the Head)\n1:30  Team revises as needed\n3:45  Presentation to the school community, then the team exits"
+};
+const RATING_DEF = `<ul>
+<li><b>Highly effective:</b> The self-study and visit provide evidence that the school is meeting the standard in a way that has resulted in a highly positive impact on student learning, the school’s program, and the school’s operation.</li>
+<li><b>Effective:</b> … in a way that has resulted in a satisfactory level of impact on student learning, the school’s program, and the school’s operation.</li>
+<li><b>Somewhat effective:</b> … in a way that has resulted in limited positive impact on student learning, the school’s program, and the school’s operation.</li>
+<li><b>Minimally effective:</b> The school is seriously struggling to meet the standard, and its actions have resulted or could result in little or no positive impact, and possibly even in a negative impact, on student learning, the school’s program, and the school’s operation.</li></ul>`;
+const AI_HUMAN = '<span class="pill warn" title="CAIS 2026 Visiting Team AI Guidelines">Written by you, not AI</span>';
+const AI_ASSIST = '<span class="pill ok" title="CAIS 2026 Visiting Team AI Guidelines">AI may help summarize; you verify against the source</span>';
+const G = {
+ commentary:`<p>The school’s own profile is pre-populated in the Portal exactly as the school wrote it. This box is the team’s commentary on it.</p><ul><li>Add information and observations the profile leaves out, such as growth or significant changes.</li><li>Keep it basically factual.</li><li>Do not repeat what the profile already says.</li><li>Length in the CAIS sample: three short paragraphs.</li></ul>`,
+ progress:`<p>Discuss the significant changes and the progress made on the previous major recommendations since the last self-study. The point is to evaluate how the school used its self-study and major recommendations through the cycle.</p><ul><li>Pay particular attention to how each major recommendation was addressed since the midterm report.</li><li>The school must respond substantively to every major recommendation. It is expected, but not required, to implement each one. If it chose not to, it should give reasons.</li><li>Note any recommendation that was minimally addressed and say whether this report will repeat it.</li><li>Format used in the CAIS sample: an opening summary, then each prior recommendation quoted with its citation, followed by a short paragraph on progress.</li></ul>`,
+ process:`<p>Rate how effective the school was in promoting breadth of involvement and collaboration within the full school community in creating the self-study, then explain the rating and summarize the evidence.</p><ul><li><b>Highly effective:</b> a very high degree of broad involvement and collaboration.</li><li><b>Effective:</b> a satisfactory degree.</li><li><b>Somewhat effective:</b> a limited degree.</li><li><b>Minimally effective:</b> largely unsuccessful in securing even a minimal degree.</li></ul><p>Name which constituencies took part (faculty, staff, administration, trustees, parents, students, alumni) and which did not.</p>`,
+ context:`<p>Opens the section and gives readers the background on the school’s efforts in this area. Generally one or two succinct paragraphs.</p><ul><li>Identify the important issues the school is facing or will face, as opportunities, challenges, or both.</li><li>Pinpoint and articulate the issues. It is not the team’s role to prescribe solutions.</li><li>You may include a few guiding questions for the school’s further self-reflection. They are non-binding: the school does not have to use them or report back.</li></ul><p><b>AI rule:</b> if you use AI to summarize, you are responsible for checking every statement against the self-study and what you saw. No file with a student’s or employee’s name or image goes into any AI tool.</p>`,
+ strengths:`<p>Record the school’s major strengths for this section, each with a brief explanation.</p><ul><li>Only the notable ones: typically one to four per section, and generally fewer than 15 in the whole report.</li><li>Favor strengths that will help the school navigate its future.</li><li>CAIS sample format: one paragraph per strength. The first sentence names the strength, the rest gives the evidence.</li><li>Reports no longer contain commendations.</li></ul>`,
+ recs:`<p>Recommendations for future work in this section. Mark a few as major.</p><ul><li>Per section: single figures. Major recommendations in the whole report: typically four to eight.</li><li>Do not be prescriptive. Name who should act and what needs attention, and leave the how to the school.</li><li>CAIS sample wording begins <i>“That the [Board / Head / faculty and administration] …”</i></li><li>Document every recommendation with <b>at least two</b> of these, in this order: (1) CAIS standards, institutional goals, school publications; (2) self-study page numbers from the Portal PDF; (3) conferences, naming groups and never individuals; (4) observations.</li></ul><div class="q">Sample: That the Board of Trustees, Head of School, and Business Manager immediately collaborate to develop a credible balanced budget for the coming year … (Standards 8 and 9; self-study pp. 75–77, 83–84; interviews with Finance Committee and administrative team)</div>`,
+ rating:`<p>How effective is the school in meeting the standard? The rating is part of the report and will be seen by the school.</p>${RATING_DEF}`,
+ rationale:`<p>Every rating needs a statement of rationale that explains the committee’s reasoning and summarizes the evidence it used. Tie it to the standard’s language and indicators, the self-study (with page numbers), and what the team heard and saw.</p>`,
+ notes:`<p>Working notes for the two of you on this chapter. Self-study page numbers, things to verify, baseline requirements the school answered “no” to. Nothing here goes into the report unless you move it. Use group names (“middle school faculty”), never the names of students or employees.</p>`,
+ questions:`<p>Before the visit the chair asks each member for written questions about issues, concerns, clarifications, and evidence that should be pursued on campus. One question per row, and say which group can answer it (trustees, faculty, parents, students, business office).</p>`
+};
+/* ---------- state ---------- */
+let db=null,user=null,isOwner=false,canWrite=true,connected=false;
+const S={fields:{},items:{},assign:{},plan:{},status:{},prefs:{}};
+let me=null;
+const $=(s,r)=>(r||document).querySelector(s), $$=(s,r)=>[...(r||document).querySelectorAll(s)];
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const std=n=>STANDARDS.find(s=>s.n===n);
+const first=k=>TEAM[k]?TEAM[k].name.split(" ")[0]:"";
+const assignOf=k=>{const a=S.assign[k];const p=PROPOSED[k]||["",""];return a?{lead:a.lead||"",reader:a.reader||"",saved:true}:{lead:p[0],reader:p[1],saved:false}};
+const statusOf=n=>(S.status[n]&&S.status[n].s)||STATUSES[0];
+const fval=(col,id)=>{const d=(col==="c_plan"?S.plan:S.fields)[id];return d&&typeof d.t==="string"?d.t:null};
+const itemsOf=(kind,key,val)=>Object.entries(S.items).filter(([,v])=>v.kind===kind&&(key?v[key]===val:true)).sort((a,b)=>(a[1].at||0)-(b[1].at||0));
+const when=t=>t?new Date(t).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"";
+function banner(msg){$("#banner").textContent=msg||""}
+/* ---------- writes ---------- */
+const chain={};
+function write(path,data,del){
+  if(!db){banner("Not connected to the shared workspace, so this change is not saved. Sign in again and retry.");return Promise.resolve()}
+  const run=()=> (del?db.doc(path).delete():db.doc(path).set(data)).catch(e=>{
+    if(e&&e.code==="permission-denied"){banner("That change was not saved. Only the chair can edit this part, or your sign-in has expired.")}
+    else banner("A change could not be saved ("+((e&&e.code)||"error")+"). Keep this tab open and try the edit again.");
+  });
+  chain[path]=(chain[path]||Promise.resolve()).then(run);return chain[path];
+}
+const timers={};
+function saveField(el){
+  const col=el.dataset.col||"fields", id=el.dataset.f, v=el.value;
+  if(fval(col,id)===v||(fval(col,id)===null&&v===(el.dataset.def||""))) return;
+  write(col+"/"+id,{t:v,by:me||"",at:Date.now()});
+}
+function saveItemKey(el){
+  const id=el.dataset.item,k=el.dataset.k,cur=S.items[id]; if(!cur) return;
+  const v=el.type==="checkbox"?el.checked:el.value; if(cur[k]===v) return;
+  const next=Object.assign({},cur,{[k]:v,by:me||cur.by||"",at:cur.at}); S.items[id]=next; write("items/"+id,next);
+}
+function addItem(o){ if(!db){banner("Not connected, so nothing can be added yet.");return}
+  db.collection("items").add(Object.assign({text:"",by:me||"",at:Date.now()},o)).catch(()=>banner("Could not add the row. Try again.")) }
+/* ---------- components ---------- */
+function guide(key,label){return `<details class="guide"><summary>${label||"What goes here, and how to format it"}</summary><div class="g">${G[key]}</div></details>`}
+function field(id,o){
+  const col=o.col||"fields", saved=fval(col,id), v=saved===null?(o.def||""):saved, d=(col==="c_plan"?S.plan:S.fields)[id];
+  const dis=(o.chair&&!isOwner)||!canWrite?" disabled":"";
+  const meta=d?`Saved ${when(d.at)}${d.by&&TEAM[d.by]?" by "+first(d.by):""}`:(o.def?"Draft starting point, not yet saved":"");
+  return `<div class="fld"><div class="row"><label for="f-${id}">${o.label}</label>${o.ai||""}${o.chair?'<span class="pill">Chair edits</span>':""}</div>${o.guide?guide(o.guide):""}
+  <textarea id="f-${id}" data-f="${id}" data-col="${col}" data-def="${esc(o.def||"")}" rows="${o.rows||5}" placeholder="${esc(o.ph||"")}"${dis}>${esc(v)}</textarea><div class="meta" data-meta="${id}">${meta}</div></div>`;
+}
+function selectField(id,label,opts,guideKey){
+  const v=fval("fields",id)||"";
+  return `<div class="fld"><div class="row"><label for="f-${id}">${label}</label>${AI_HUMAN}</div>${guideKey?guide(guideKey,"Rating definitions"):""}
+  <select id="f-${id}" data-f="${id}"${canWrite?"":" disabled"}>${opts.map(o=>`<option${o===v?" selected":""} value="${esc(o)}">${o||"Not yet rated"}</option>`).join("")}</select></div>`;
+}
+function personSelect(attrs,val,dis){return `<select ${attrs}${dis?" disabled":""}><option value="">Unassigned</option>${Object.keys(TEAM).map(k=>`<option value="${k}"${k===val?" selected":""}>${first(k)}</option>`).join("")}</select>`}
+function itemText(id,v,k,rows,ph){return `<textarea data-item="${id}" data-k="${k}" rows="${rows}" placeholder="${esc(ph)}"${canWrite?"":" disabled"}>${esc(v[k]||"")}</textarea>`}
+function citeCount(v){return ["c1","c2","c3","c4"].filter(k=>(v[k]||"").trim()).length}
+function recText(v){const c=[v.c1&&"Standards "+v.c1,v.c2&&"self-study pp. "+v.c2,v.c3,v.c4].filter(Boolean).join("; ");return (v.text||"").trim()+(c?" ("+c+")":"")}
+/* ---------- views ---------- */
+const VIEWS=[["","Start here"],["overview","Overview"],["plan","Plan and deadlines"],["team","Team and assignments"],["","Write"],["front","Front matter"],["section-1","I. Purpose and Values"],["section-2","II. Teaching and Learning"],["section-3","III. Financial Sustainability"],["section-4","IV. Operations"],["section-5","V. Stewardship and Leadership"],["section-6","VI. Improvement"],["majors","Major recommendations"],["questions","Questions for the visit"],["selfstudy","Self-study"],["","Visit"],["schedule","Visit schedule"],["ai","AI guidelines"],["reference","Reference"]];
+function route(){const h=location.hash.replace("#","");return VIEWS.some(v=>v[0]===h&&h)?h:"overview"}
+function renderNav(){const r=route();$("#nav").innerHTML=VIEWS.map(([h,t])=>h?`<a href="#${h}"${h===r?' class="on" aria-current="page"':""}>${t}</a>`:`<div class="grp">${t}</div>`).join("")}
+function chapterRows(filterMine){
+  return SECTIONS.map(sec=>{
+    const rows=sec.ch.map(n=>{const s=std(n);if(NA[n])return filterMine?"":`<tr class="na"><td class="num">${n}</td><td>${esc(s.title)}</td><td colspan="4">Not applicable (day school)</td></tr>`;
+      const a=assignOf(n); if(filterMine&&a.lead!==me&&a.reader!==me) return "";
+      const st=statusOf(n), r=fval("fields","ch"+n+".rating"), q=itemsOf("question","ch",n).length;
+      return `<tr><td class="num">${n}</td><td><a href="#section-${sec.n}">${esc(s.title)}</a></td><td>${first(a.lead)||"—"}${a.saved?"":' <span class="pill">proposed</span>'}</td><td>${first(a.reader)||"—"}</td><td><span class="pill ${st==="Final"?"ok":st==="Not started"?"":"go"}">${st}</span></td><td class="num">${q||""}${r?' <span class="pill ok">rated</span>':""}</td></tr>`}).join("");
+    return rows?`<tr class="sec"><td colspan="6">Section ${sec.rom}: ${sec.title}</td></tr>`+rows:"";
+  }).join("");
+}
+const chTable=(mine)=>`<div class="tblwrap"><table class="tbl"><thead><tr><th>Ch.</th><th>Standard</th><th>Lead writer</th><th>Second reader</th><th>Status</th><th>Questions</th></tr></thead><tbody>${chapterRows(mine)}</tbody></table></div>`;
+function vOverview(){
+  const days=Math.ceil((VISIT_START-new Date())/864e5);
+  const act=STANDARDS.filter(s=>!NA[s.n]);
+  const drafted=act.filter(s=>["Drafting","Ready for chair","Final"].includes(statusOf(s.n))).length;
+  const nStr=itemsOf("strength").length, nMaj=itemsOf("rec").filter(([,v])=>v.major).length, nQ=itemsOf("question").length;
+  const next=MILESTONES.filter(m=>m.id&&!(S.plan[m.id]&&S.plan[m.id].done)).slice(0,4);
+  return `<h2>Overview</h2><p class="lede">One place for the five of us to plan the visit and draft the report for The Country School, a preschool through grade 8 day school in Valley Village. The CAIS Portal stays the official record. We draft here and paste the finished text into the Portal.</p>
+  <div class="tiles"><div class="tile"><b class="num">${days>0?days:0}</b><span>days to the visit</span></div><div class="tile"><b class="num">${drafted}/${act.length}</b><span>chapters in draft</span></div><div class="tile"><b class="num">${nQ}</b><span>questions posted</span></div><div class="tile"><b class="num">${nStr}</b><span>strengths (under 15)</span></div><div class="tile"><b class="num">${nMaj}</b><span>major recs (4 to 8)</span></div></div>
+  ${me?`<h3>${first(me)}, your chapters</h3>${chTable(true)}`:`<div class="note">Choose your name in the <b>Working as</b> menu at the top right. The page then shows your chapters first and signs your saves.</div>`}
+  <h3>Next on the calendar</h3>${next.map(m=>`<div class="chk"><span class="d">${m.d}</span><span class="t"><span class="pill">${m.who}</span> ${m.t}</span></div>`).join("")}<p class="small" style="margin-top:8px"><a href="#plan">Full plan and deadlines</a></p>
+  <h3>All sixteen chapters</h3>${chTable(false)}
+  <h3>How to work in this page</h3><ul><li>Every writing box has a line above it that opens the CAIS definition and format for that piece, so nobody has to go back to the manuals.</li><li>Boxes save on their own a moment after you stop typing. Two people editing the same box at once will overwrite each other, so the lead writer types and the second reader comments in the chapter notes.</li><li>Never enter the name of a student or employee. Cite groups: “middle school faculty,” “parents.”</li><li>The recommended accreditation status is never written here.</li></ul>`;
+}
+function vPlan(){
+  return `<h2>Plan and deadlines</h2><p class="lede">Dates run from today to the Portal submission on March 27. The chair checks items off. The steps follow the CAIS Visiting Committee Chair Responsibilities.</p>`+
+  MILESTONES.map(m=>{ if(m.ph) return `<h3>${m.ph}</h3>`; const done=!!(S.plan[m.id]&&S.plan[m.id].done);
+    return `<div class="chk${done?" done":""}"><input type="checkbox" id="ms-${m.id}" data-ms="${m.id}"${done?" checked":""}${isOwner?"":" disabled"}><span class="d">${m.d}</span><label class="t" for="ms-${m.id}"><span class="pill">${m.who}</span> ${m.t}</label></div>`}).join("");
+}
+function vTeam(){
+  const load=k=>Object.keys(PROPOSED).filter(c=>assignOf(c).lead===k).length;
+  const cards=Object.entries(TEAM).map(([k,p])=>{const pr=(S.prefs[k]&&S.prefs[k].ch)||[];
+    return `<div class="card"><div class="eyebrow">${p.role}</div><b>${p.name}</b><p class="small" style="margin-top:6px">${p.lens}</p><div class="mono">Leads ${load(k)} part${load(k)===1?"":"s"}${pr.length?" · asked for ch. "+pr.slice().sort((a,b)=>a-b).join(", "):""}</div></div>`}).join("");
+  const mine=me?((S.prefs[me]&&S.prefs[me].ch)||[]):[];
+  const chips=STANDARDS.filter(s=>!NA[s.n]).map(s=>`<button class="chip${mine.includes(s.n)?" on":""}" data-pref="${s.n}" aria-pressed="${mine.includes(s.n)}"${me&&canWrite?"":" disabled"}>${s.n} ${esc(s.title)}</button>`).join("");
+  const row=(k,label)=>{const a=assignOf(k);return `<tr><td>${label}</td><td>${personSelect(`data-as="${k}" data-role="lead" aria-label="Lead writer for ${esc(label)}"`,a.lead,!isOwner)}</td><td>${personSelect(`data-as="${k}" data-role="reader" aria-label="Second reader for ${esc(label)}"`,a.reader,!isOwner)}</td><td>${a.saved?'<span class="pill ok">confirmed</span>':'<span class="pill">proposed</span>'}</td><td class="small">${Object.keys(TEAM).filter(p=>((S.prefs[p]&&S.prefs[p].ch)||[]).includes(+k)).map(first).join(", ")}</td></tr>`};
+  return `<h2>Team and assignments</h2><p class="lede">Each chapter has a lead writer and a second reader. The lead drafts the rating rationale and contributes strengths and recommendations to the section. The section lead writes the context statement and pulls the section together. Assignments below are a proposal based on each person’s role, and they are open until the chair confirms them in the Portal.</p>
+  <div class="cards">${cards}</div>
+  ${field("roster",{col:"c_plan",label:"Team contact details",chair:true,rows:6,ph:"Full names, titles, schools, emails, cell numbers for the visit."})}
+  <h3>Which chapters would you like?</h3><p class="small">${me?"Tap any chapters you would enjoy or know well. "+first(me)+"’s choices are highlighted.":"Choose your name at the top right first."}</p><div class="chips">${chips}</div>
+  <h3>Assignments</h3><div class="tblwrap"><table class="tbl"><thead><tr><th>Part of the report</th><th>Lead writer</th><th>Second reader</th><th></th><th>Asked for by</th></tr></thead><tbody>
+  ${row("front","Front matter: profile commentary, progress report, self-study process")}
+  ${SECTIONS.map(sec=>`<tr class="sec"><td colspan="5">Section ${sec.rom}: ${sec.title} · section lead ${first(sec.lead)}</td></tr>`+sec.ch.filter(n=>!NA[n]).map(n=>row(n,n+". "+std(n).title)).join("")).join("")}
+  </tbody></table></div>${isOwner?"":'<p class="small">Only the chair can change assignments.</p>'}`;
+}
+function vFront(){
+  return `<h2>Front matter</h2><p class="lede">The three parts of the report that come before the six sections, plus the policy confirmation at the top of the Portal form.</p>
+  <h3>Confirmation of adherence to CAIS policies</h3>${selectField("policies","Does the school adhere to the CAIS Statement of Fundamental Membership Requirements and the Code of Ethics?",["","Yes","No"])}<p class="small">If the team determines the answer is no, the chair contacts the CAIS office.</p>
+  <h3>I. Introduction</h3>${ssBlock("intro","the school\u2019s profile")}${field("intro.commentary",{label:"Commentary on the school’s profile",guide:"commentary",ai:AI_HUMAN,rows:9})}
+  <h3>II. Assessment of the progress report</h3>${ssBlock("progress","the school\u2019s report on previous recommendations")}${field("progress",{label:"Progress on previous major recommendations",guide:"progress",ai:AI_HUMAN,rows:12})}
+  <h3>III. Comments on the self-study process</h3>${selectField("process.rating","Effectiveness in securing broad involvement and collaboration",RATINGS,null)}${field("process.rationale",{label:"Justification statement",guide:"process",ai:AI_HUMAN,rows:8})}`;
+}
+function vSection(n){
+  const sec=SECTIONS[n-1];
+  const strengths=itemsOf("strength","sec",n), recs=itemsOf("rec","sec",n), allS=itemsOf("strength").length, allM=itemsOf("rec").filter(([,v])=>v.major).length;
+  let h=`<div class="eyebrow">Section ${sec.rom} · chapters ${sec.ch.join(", ")} · section lead ${first(sec.lead)}</div><h2>${sec.title}</h2>
+  <p class="lede">Each section of the report has four parts, in this order: a context statement, notable strengths, recommendations, and a rating with rationale for each chapter standard.</p>
+  <div class="tabs">${sec.ch.map(c=>`<a href="#section-${n}" data-jump="ch-${c}">Ch. ${c} ${esc(std(c).title)}</a>`).join("")}<button class="pri" data-copysec="${n}">Copy this section for the Portal</button></div>
+  <h3>1. Context statement</h3>${field("sec"+n+".context",{label:"Context statement for Section "+sec.rom,guide:"context",ai:AI_ASSIST,rows:9})}
+  <h3>2. Notable strengths <span class="pill ${strengths.length>4?"warn":""}">${strengths.length} here · aim for 1 to 4</span> <span class="pill ${allS>=15?"warn":""}">${allS} in report · under 15</span></h3>${AI_HUMAN}${guide("strengths")}
+  ${strengths.map(([id,v],i)=>`<div class="item"><div class="hd"><span class="mono">Strength ${i+1}${v.by&&TEAM[v.by]?" · "+first(v.by):""}</span><button class="x" data-del="${id}" aria-label="Delete strength ${i+1}">Delete</button></div>${itemText(id,v,"text",4,"Name the strength in the first sentence, then give the evidence.")}</div>`).join("")}
+  <button data-add="strength" data-sec="${n}">Add a strength</button>
+  <h3>3. Recommendations <span class="pill ${recs.length>9?"warn":""}">${recs.length} here · single figures</span> <span class="pill ${allM>8?"warn":""}">${allM} major in report · 4 to 8</span></h3>${AI_HUMAN}${guide("recs")}
+  ${recs.map(([id,v],i)=>{const cc=citeCount(v);return `<div class="item"><div class="hd"><span class="mono">Recommendation ${i+1}${v.by&&TEAM[v.by]?" · "+first(v.by):""} <span class="pill ${cc>=2?"ok":"warn"}">${cc} of 4 references${cc>=2?"":" · needs 2"}</span></span><span><label class="mono"><input type="checkbox" data-item="${id}" data-k="major"${v.major?" checked":""}${canWrite?"":" disabled"}> Major</label> <button class="x" data-del="${id}" aria-label="Delete recommendation ${i+1}">Delete</button></span></div>
+   ${itemText(id,v,"text",3,"That the …")}
+   <div class="cites"><div><label>1. Standards / school documents</label><input type="text" data-item="${id}" data-k="c1" value="${esc(v.c1||"")}" placeholder="8 and 9"></div><div><label>2. Self-study pages</label><input type="text" data-item="${id}" data-k="c2" value="${esc(v.c2||"")}" placeholder="75–77, 83–84"></div><div><label>3. Conferences (groups only)</label><input type="text" data-item="${id}" data-k="c3" value="${esc(v.c3||"")}" placeholder="interviews with Finance Committee"></div><div><label>4. Observations</label><input type="text" data-item="${id}" data-k="c4" value="${esc(v.c4||"")}" placeholder="classroom visits in grades 3–5"></div></div></div>`}).join("")}
+  <button data-add="rec" data-sec="${n}">Add a recommendation</button>
+  <h3>4. Chapter standards: ratings and rationales</h3>`;
+  h+=sec.ch.map(c=>{const s=std(c); if(NA[c]) return `<h4 id="ch-${c}">Chapter ${c}. ${esc(s.title)}</h4><p class="small">${NA[c]}</p>`;
+    const a=assignOf(c), qs=itemsOf("question","ch",c);
+    return `<h4 id="ch-${c}">Chapter ${c}. ${esc(s.title)}</h4>
+    <div class="row" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span class="mono">Lead ${first(a.lead)||"unassigned"} · second reader ${first(a.reader)||"unassigned"}</span>
+    <label class="mono" for="st-${c}">Status</label><select id="st-${c}" data-status="${c}"${canWrite?"":" disabled"}>${STATUSES.map(x=>`<option${x===statusOf(c)?" selected":""}>${x}</option>`).join("")}</select></div>
+    <div class="std"><div class="eyebrow">Standard ${c}</div><p>${esc(s.std)}</p><details class="guide"><summary>The ${s.ind.length} indicators of meeting this standard at a high level</summary><div class="g"><ol>${s.ind.map(i=>`<li>${esc(i)}</li>`).join("")}</ol></div></details></div>
+    ${ssBlock("ch"+c,"what the school wrote for chapter "+c)}
+    ${field("ch"+c+".notes",{label:"Reading notes and evidence",guide:"notes",rows:5,ph:"p. 41: no written curriculum review cycle. Ask division heads."})}
+    <div class="lbl">Questions to pursue on campus <span class="pill">${qs.length}</span></div>${guide("questions")}
+    ${qs.map(([id,v])=>`<div class="item"><div class="cites" style="margin-top:0;grid-template-columns:2fr 1fr auto;align-items:end"><div><label>Question</label><input type="text" data-item="${id}" data-k="text" value="${esc(v.text||"")}"></div><div><label>Ask</label><input type="text" data-item="${id}" data-k="c3" value="${esc(v.c3||"")}" placeholder="trustees"></div><button class="x" data-del="${id}">Delete</button></div></div>`).join("")}
+    <button data-add="question" data-ch="${c}">Add a question</button>
+    ${selectField("ch"+c+".rating","Rating for Standard "+c,RATINGS,"rating")}
+    ${field("ch"+c+".rationale",{label:"Rationale for the rating",guide:"rationale",ai:AI_HUMAN,rows:6})}`}).join("");
+  return h;
+}
+function vMajors(){
+  const majors=SECTIONS.flatMap(sec=>itemsOf("rec","sec",sec.n).filter(([,v])=>v.major).map(([id,v])=>({sec,v})));
+  return `<h2>Summary of major recommendations</h2><p class="lede">The Portal builds this list on its own from the recommendations marked major in each section. This view shows what it will contain so the team can read them side by side. Typical range for a report: four to eight.</p>
+  ${majors.length?majors.map((m,i)=>`<div class="item"><div class="mono">Recommendation ${i+1} · Section ${m.sec.rom}${citeCount(m.v)<2?' <span class="pill warn">needs 2 references</span>':""}</div><p style="margin:6px 0 0">${esc(recText(m.v))}</p></div>`).join(""):'<p class="small">None marked yet. Mark a recommendation as Major inside its section.</p>'}`;
+}
+function vQuestions(){
+  return `<h2>Questions for the visit</h2><p class="lede">Everything the team wants to pursue on campus, gathered from the chapter pages. Due February 12. The chair uses this list to shape the schedule and to decide who meets with whom.</p>`+
+  SECTIONS.map(sec=>{const rows=sec.ch.flatMap(c=>itemsOf("question","ch",c).map(([id,v])=>`<tr><td class="num">${c}</td><td>${esc(v.text||"")}</td><td>${esc(v.c3||"")}</td><td>${first(v.by)}</td></tr>`));
+    return `<h3>Section ${sec.rom}: ${sec.title}</h3>${rows.length?`<div class="tblwrap"><table class="tbl"><thead><tr><th>Ch.</th><th>Question</th><th>Ask</th><th>From</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`:`<p class="small">Nothing posted yet. Add questions on the <a href="#section-${sec.n}">section page</a>.</p>`}`}).join("");
+}
+function vSchedule(){
+  const day=(k,l)=>field("sched_"+k,{col:"c_plan",label:l,chair:true,def:SCHED_DEFAULT[k],rows:10});
+  return `<h2>Visit schedule</h2><p class="lede">A draft built from the two sample schedules in the CAIS instructions, adjusted for a preschool through grade 8 school. The chair finalizes it with the Head and the Self-Study Coordinator. Members should ask for extra meetings as needed.</p>
+  ${day("sun","Sunday, March 14")}${day("mon","Monday, March 15")}${day("tue","Tuesday, March 16")}${day("wed","Wednesday, March 17")}
+  ${field("logistics",{col:"c_plan",label:"Hotel, travel, work room, expenses",chair:true,rows:5,ph:"Hotel and confirmation details, work room location, wifi, who to call on arrival."})}
+  <div class="note">The committee does not read or report its recommended status to the Head. At the readout the team shares context statements, a short list of strengths, and the major recommendations, reminds the audience the report is a confidential draft and that recording is prohibited, thanks the school, and exits.</div>`;
+}
+function vAI(){
+  const log=itemsOf("ailog");
+  return `<h2>AI guidelines for this team</h2><p class="lede">CAIS is piloting AI guidelines for 2026 visiting teams and asks that teams not deviate from them. This page holds the rules, the plan the chair agrees with the Head of The Country School, and a log that feeds the AI use form CAIS asks for.</p>
+  <h3>The rules, in short</h3><ul>
+  <li><b>Human, AI, human.</b> Work begins with a person’s question and ends with a person’s reflection and judgment. AI may support synthesis, organization, or pattern recognition. Evaluative judgment, contextual interpretation, and final conclusions stay fully human.</li>
+  <li><b>Non-training tools only.</b> Use only AI tools that do not store, reuse, or learn from what you enter. CAIS gives Gemini for Education, ChatGPT Plus or higher, Claude Pro or Team, and Flint as examples.</li>
+  <li><b>A plan agreed with the Head.</b> The team settles how AI will or will not be used in consultation with the Head of the school, asks explicitly whether the school is comfortable with the self-study being used in non-training tools, and is transparent about the uses.</li>
+  <li><b>No identifying material.</b> No attachment, resource, or exhibit containing student-identifying information goes into any AI tool, whatever its training status. That includes any file with students’ or employees’ names or images.</li>
+  <li><b>Context statements:</b> if you use AI, you verify the summary against the original source material.</li>
+  <li><b>Ratings, rationales, notable strengths, recommendations:</b> written by team members. Not generated by AI.</li>
+  <li><b>AI use form:</b> completed for the CAIS AI Task Force.</li></ul>
+  <p class="small">Every writing box in this workspace carries one of two labels that restate which rule applies to it. This workspace has no AI features built into it; it only stores what the team types.</p>
+  <h3>Our plan</h3>
+  ${field("ai_school",{col:"c_plan",label:"What the Head of The Country School agreed to",chair:true,rows:4,ph:"Date of the conversation. Is the school comfortable with the self-study being used in non-training tools? Any limits."})}
+  ${field("ai_plan",{col:"c_plan",label:"How this team will and will not use AI",chair:true,rows:6,ph:"Permitted: summarizing self-study chapters for context statements, organizing notes. Not permitted: ratings, rationales, strengths, recommendations, any upload containing names or images."})}
+  <h3>AI use log <span class="pill">${log.length}</span></h3><p class="small">One line each time you use an AI tool for this visit. It takes ten seconds and makes the CAIS form easy to complete.</p>
+  ${log.map(([id,v])=>`<div class="item"><div class="cites" style="margin-top:0;grid-template-columns:1fr 2fr 1fr auto;align-items:end"><div><label>Tool${v.by&&TEAM[v.by]?" · "+first(v.by):""}</label><input type="text" data-item="${id}" data-k="c1" value="${esc(v.c1||"")}" placeholder="Claude Team"></div><div><label>What for</label><input type="text" data-item="${id}" data-k="text" value="${esc(v.text||"")}" placeholder="Summarized ch. 9 narrative for context statement"></div><div><label>How I verified</label><input type="text" data-item="${id}" data-k="c2" value="${esc(v.c2||"")}" placeholder="Checked against pp. 60–68"></div><button class="x" data-del="${id}">Delete</button></div></div>`).join("")}
+  <button data-add="ailog">Add a log line</button>`;
+}
+function vReference(){
+  return `<h2>Reference</h2><p class="lede">The parts of the CAIS Instructions for the Visiting Committee that the team returns to most. The full manuals are in the Portal.</p>
+  <h3>Shape of the report</h3><ol><li>Confirmation of adherence to CAIS policies</li><li>Introduction: the school’s profile (pre-populated) and the team’s commentary</li><li>Assessment of the progress report</li><li>Comments on the self-study process, with a rating</li><li>Six sections covering the 16 standards. Each has a context statement, notable strengths, recommendations, and a rating with rationale per chapter.</li><li>Summary of major recommendations (auto-populated in the Portal)</li><li>Confidential Documentation and Justification Statement</li></ol>
+  <h3>Rating scale for the 16 standards</h3>${RATING_DEF}
+  <h3>Working rules</h3><ul><li>Relate every discussion to the standards.</li><li>Do not be prescriptive. Identify the issue and leave the solution to the school.</li><li>Cite groups, never individuals.</li><li>See a reasonable number of classrooms and make sure no evidence is overlooked.</li><li>The school gets a chance to ask questions before the final draft.</li><li>Do not leave a copy of the report at the school or give it to anyone there.</li><li>Keep copies of all documents and treat them confidentially.</li></ul>
+  <h3>The recommended status of accreditation</h3><p>The team reviews all 16 standards, discusses, and votes. The chair records the recommendation, the vote, the options considered, and the rationale in the confidential form in the Portal, with member signatures. It must line up with the report. The committee does not imply the status to anyone at the school or answer questions about it. The CAIS Board of Standards reviews the report and recommends a status to the CAIS Board of Directors, which decides.</p>
+  <p>The options: seven years with a mid-cycle progress report; seven years with a mid-cycle report and a one-day visit (with or without additional requirements); two years with an in-depth report and one-day visit; one year with an in-depth report and one-day visit; denial.</p>
+  <div class="note">None of that is written in this workspace. There is deliberately no box for it.</div>
+  <h3>The readout</h3><p>The presentation follows the six sections. For each: the context statement, at least one notable strength, and the major recommendations. Ratings and the recommended status are left out. Before it, the chair meets the Head to preview the report and reads the chapter ratings and rationales to the Head. The audience is told the report is a draft that may change, that it is confidential, and that recording is prohibited.</p>
+  <h3>After the visit</h3><ul><li>Expense vouchers go to the school.</li><li>Final report and confidential recommendation are submitted in the Portal within 10 days: by March 27, 2027.</li><li>Do not share a copy with the school.</li></ul>`;
+}
+/* ---------- self-study ---------- */
+let SS=null,ssSub=false;const ssOpen={},ssView={a:"",b:""};
+function ssStart(){ if(ssSub||!db) return; ssSub=true; db.collection("selfstudy").onSnapshot(s=>{SS={};s.docs.forEach(d=>{const v=d.data();SS[v.n]=v.t});ssFill();if(route()==="selfstudy"&&!editing())render()},()=>{SS={}}) }
+function ssPages(a,b){
+  if(!SS) return '<p class="small">Loading the self-study\u2026</p>';
+  const ns=Object.keys(SS).map(Number).sort((x,y)=>x-y);
+  if(!ns.length) return '<p class="small">The self-study has not been uploaded yet. The chair adds it on the Self-study page once the school submits it.</p>';
+  a=parseInt(a,10)||0; b=parseInt(b,10)||a;
+  if(!a) return '<p class="small">Enter the first and last page above to show that part of the self-study here. The range is shared with the team.</p>';
+  return ns.filter(n=>n>=a&&n<=b).map(n=>`<div class="sspage"><div class="mono">p. ${n}</div><p>${esc(SS[n]).replace(/\n/g,"<br>")}</p></div>`).join("")||'<p class="small">No pages in that range.</p>';
+}
+function ssBlock(key,label){
+  const a=fval("fields",key+".ssa")||"",b=fval("fields",key+".ssb")||"";
+  return `<details class="guide" data-ss="${key}"${ssOpen[key]?" open":""}><summary>Self-study: ${label}</summary><div class="g"><div class="cites" style="grid-template-columns:120px 120px;margin-top:2px"><div><label for="f-${key}.ssa">First page</label><input type="text" id="f-${key}.ssa" data-f="${key}.ssa" inputmode="numeric" value="${esc(a)}"></div><div><label for="f-${key}.ssb">Last page</label><input type="text" id="f-${key}.ssb" data-f="${key}.ssb" inputmode="numeric" value="${esc(b)}"></div></div><div class="ssbody" data-ssbody="${key}">${ssOpen[key]?ssPages(a,b):""}</div></div></details>`;
+}
+function ssFill(){ $$("[data-ssbody]").forEach(el=>{const k=el.dataset.ssbody; if(ssOpen[k]) el.innerHTML=ssPages(fval("fields",k+".ssa"),fval("fields",k+".ssb"))}); const v=$("#ss-view"); if(v) v.innerHTML=ssPages(ssView.a,ssView.b) }
+function vSelfStudy(){
+  ssStart(); const n=SS?Object.keys(SS).length:0;
+  return `<h2>Self-study</h2><p class="lede">The text of the school\u2019s self-study, so each chapter can be read beside the team\u2019s notes. Page numbers follow the PDF generated in the Portal, so citations match. Text only: photos, charts, and attached exhibits stay in the Portal.</p>
+  <p><span class="pill ${n?"ok":""}">${SS?(n?n+" pages loaded":"Not uploaded yet"):"Checking\u2026"}</span></p>
+  ${isOwner?`<h3>Upload or replace</h3><p class="small">In the Portal, open the self-study and choose Generate PDF. Pick that file here. It is read in your browser and only its text is saved. Uploading again replaces the earlier copy.</p><p><input type="file" id="ss-file" accept="application/pdf"> <button class="pri" id="ss-go">Upload self-study</button></p><p class="mono" id="ss-msg"></p>`:""}
+  <h3>Read by page</h3><div class="cites" style="grid-template-columns:120px 120px auto;align-items:end"><div><label for="ss-a">First page</label><input type="text" id="ss-a" inputmode="numeric" value="${esc(ssView.a)}"></div><div><label for="ss-b">Last page</label><input type="text" id="ss-b" inputmode="numeric" value="${esc(ssView.b)}"></div><div><button id="ss-show">Show pages</button></div></div>
+  <div class="ssbody" id="ss-view" style="max-height:none">${ssPages(ssView.a,ssView.b)}</div>`;
+}
+const PDFJS="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",PDFW="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+async function ssUpload(file,msg){
+  msg("Reading the PDF\u2026");
+  if(!window.pdfjsLib){await new Promise((ok,no)=>{const sc=document.createElement("script");sc.src=PDFJS;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});window.pdfjsLib.GlobalWorkerOptions.workerSrc=PDFW}
+  const pdf=await window.pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,pages=[];
+  for(let i=1;i<=pdf.numPages;i++){const c=await (await pdf.getPage(i)).getTextContent();pages.push(c.items.map(it=>it.str+(it.hasEOL?"\n":"")).join("").replace(/[ \t]+\n/g,"\n").trim());if(i%10===0)msg("Read "+i+" of "+pdf.numPages+" pages\u2026")}
+  msg("Saving "+pages.length+" pages\u2026");
+  const old=await db.collection("selfstudy").get(),ops=[];
+  old.docs.forEach(d=>ops.push(["del",d.ref]));
+  pages.forEach((t,i)=>ops.push(["set",db.doc("selfstudy/p"+String(i+1).padStart(4,"0")),{n:i+1,t:t.slice(0,900000)}]));
+  for(let i=0;i<ops.length;i+=400){const b=db.batch();ops.slice(i,i+400).forEach(o=>o[0]==="del"?b.delete(o[1]):b.set(o[1],o[2]));await b.commit()}
+  msg("Saved "+pages.length+" pages. Check a page or two against the Portal PDF.");
+}
+document.addEventListener("toggle",e=>{const d=e.target;if(!d.dataset||!d.dataset.ss)return;ssOpen[d.dataset.ss]=d.open;if(d.open){ssStart();ssFill()}},true);
+function render(){
+  renderNav(); const r=route(), m=$("#main"), y=window.scrollY;
+  m.innerHTML = r==="overview"?vOverview(): r==="plan"?vPlan(): r==="team"?vTeam(): r==="front"?vFront(): r.startsWith("section-")?vSection(+r.split("-")[1]): r==="majors"?vMajors(): r==="questions"?vQuestions(): r==="selfstudy"?vSelfStudy(): r==="schedule"?vSchedule(): r==="ai"?vAI(): vReference();
+  window.scrollTo(0,y); pending=false;
+}
+let pending=false;
+function editing(){const a=document.activeElement;return a&&$("#main").contains(a)&&/TEXTAREA|INPUT|SELECT/.test(a.tagName)&&a.type!=="checkbox"}
+function refresh(){
+  if(!editing()){render();return}
+  pending=true; const a=document.activeElement;
+  $$("[data-f]").forEach(el=>{ if(el===a||timers[el.id]) return; const v=fval(el.dataset.col||"fields",el.dataset.f); if(v!==null&&el.value!==v) el.value=v });
+  $$("[data-item]").forEach(el=>{ if(el===a) return; const it=S.items[el.dataset.item]; if(!it) return; if(el.type==="checkbox") el.checked=!!it[el.dataset.k]; else if(el.value!==(it[el.dataset.k]||"")) el.value=it[el.dataset.k]||"" });
+}
+/* ---------- events ---------- */
+const main=$("#main");
+main.addEventListener("input",e=>{const el=e.target;
+  if(el.matches("textarea[data-f]")){clearTimeout(timers[el.id]);timers[el.id]=setTimeout(()=>{delete timers[el.id];saveField(el)},1200)}
+  else if(el.matches("[data-item]")&&el.type!=="checkbox"){const key="i"+el.dataset.item+el.dataset.k;clearTimeout(timers[key]);timers[key]=setTimeout(()=>{delete timers[key];saveItemKey(el)},1200)}
+});
+main.addEventListener("focusout",e=>{const el=e.target;
+  if(el.matches("textarea[data-f]")){clearTimeout(timers[el.id]);delete timers[el.id];saveField(el)}
+  else if(el.matches("[data-item]")&&el.type!=="checkbox"){const key="i"+el.dataset.item+el.dataset.k;clearTimeout(timers[key]);delete timers[key];saveItemKey(el)}
+  setTimeout(()=>{if(pending&&!editing())render()},150);
+});
+main.addEventListener("change",e=>{const el=e.target;
+  if(el.matches("select[data-f],input[type=text][data-f]")){S.fields[el.dataset.f]={t:el.value,by:me||"",at:Date.now()};write("fields/"+el.dataset.f,S.fields[el.dataset.f]);ssFill()}
+  else if(el.matches("[data-status]")) write("status/"+el.dataset.status,{s:el.value,by:me||"",at:Date.now()});
+  else if(el.matches("[data-ms]")) write("c_plan/"+el.dataset.ms,{done:el.checked,at:Date.now()});
+  else if(el.matches("[data-as]")){const k=el.dataset.as,a=assignOf(k);const n={lead:a.lead,reader:a.reader,at:Date.now()};n[el.dataset.role]=el.value;write("c_assign/"+k,n)}
+  else if(el.matches("input[type=checkbox][data-item]")) saveItemKey(el);
+});
+main.addEventListener("click",e=>{const el=e.target.closest("button,a[data-jump]"); if(!el) return;
+  if(el.dataset.jump){e.preventDefault();const t=document.getElementById(el.dataset.jump);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});return}
+  if(el.dataset.add){const o={kind:el.dataset.add};if(el.dataset.sec)o.sec=+el.dataset.sec;if(el.dataset.ch)o.ch=+el.dataset.ch;addItem(o)}
+  else if(el.dataset.del){ if(el.dataset.sure){write("items/"+el.dataset.del,null,true)} else {el.dataset.sure="1";el.textContent="Click again to delete";setTimeout(()=>{if(el.isConnected){delete el.dataset.sure;el.textContent="Delete"}},4000)} }
+  else if(el.id==="ss-show"){ssView.a=$("#ss-a").value;ssView.b=$("#ss-b").value;ssFill()}
+  else if(el.id==="ss-go"){const f=$("#ss-file").files[0],m=t=>{const x=$("#ss-msg");if(x)x.textContent=t};if(!f){m("Choose the PDF first.");return}el.disabled=true;ssUpload(f,m).catch(()=>m("The upload did not finish. Check the file is a PDF and try again.")).then(()=>{if(el.isConnected)el.disabled=false})}
+  else if(el.dataset.pref&&me){const n=+el.dataset.pref;let ch=((S.prefs[me]&&S.prefs[me].ch)||[]).slice();ch=ch.includes(n)?ch.filter(x=>x!==n):ch.concat(n);S.prefs[me]={ch};write("prefs/"+me,{ch,at:Date.now()});render()}
+  else if(el.dataset.copysec){const txt=sectionText(+el.dataset.copysec);navigator.clipboard.writeText(txt).then(()=>{el.textContent="Copied"},()=>{el.textContent="Copy was blocked by the browser"});setTimeout(()=>{if(el.isConnected)el.textContent="Copy this section for the Portal"},2500)}
+});
+function sectionText(n){const sec=SECTIONS[n-1],L=[];
+  L.push("SECTION "+sec.rom+": "+sec.title.toUpperCase(),"","CONTEXT STATEMENT",fval("fields","sec"+n+".context")||"","","NOTABLE STRENGTHS");
+  itemsOf("strength","sec",n).forEach(([,v],i)=>L.push((i+1)+". "+(v.text||"")));
+  L.push("","RECOMMENDATIONS"); itemsOf("rec","sec",n).forEach(([,v],i)=>L.push((i+1)+". "+(v.major?"[MAJOR] ":"")+recText(v)));
+  sec.ch.filter(c=>!NA[c]).forEach(c=>L.push("","STANDARD "+c+": "+std(c).title,"Rating: "+(fval("fields","ch"+c+".rating")||"not yet rated"),"Rationale: "+(fval("fields","ch"+c+".rationale")||"")));
+  return L.join("\n");
+}
+window.addEventListener("hashchange",()=>{render();window.scrollTo(0,0)});
+render();
+/* ---------- sign-in and connect ---------- */
+const FB={apiKey:"AIzaSyDfEzQkwP4rqMs9ewm3sPuEy_s8oHaOApI",authDomain:"country-school-visit.firebaseapp.com",projectId:"country-school-visit",appId:"1:1042607081724:web:990d075fed61e9b4a12f79"};
+const WHO={"ee6df9dfebfdec633eb838f2df1ae62d850751500ed64ff38b10ba91131ab81c": "cecee", "c300a20933731a93e8dfaff8bb63d0e7234d98e23fed0802e1b96e72091805b1": "tamar", "a15a30b45d7ef13c2b4387e03889c5e56e2f92c216fc4e2b4dc7450e799c2513": "amy", "c715a82b105273a8eede6942c4b3021711f4bc80bd645ca3f83664fd3bb7e597": "jeff", "a6e824b3e2db0c3ae118ea34d0381a49e6be29f90a160602292c7d7a56bc9e15": "jim"};
+async function sha(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+const gateEl=$("#gate");let auth=null,started=false;
+function gate(html){gateEl.innerHTML=html||"";gateEl.hidden=!html;$("#nav").hidden=!!html;main.hidden=!!html}
+function signInForm(msg,linkMode){gate(`<h2>${linkMode?"Confirm your email":"Sign in"}</h2><p class="lede">${linkMode?"Enter the email address the sign-in link was sent to.":"This workspace is for the five members of the visiting team. Enter your school email and you will get a sign-in link. There is no password."}</p><form id="si" data-link="${linkMode?1:""}"><label class="lbl" for="si-email">School email</label><input type="text" id="si-email" autocomplete="email" inputmode="email"><p style="margin-top:12px"><button class="pri" type="submit">${linkMode?"Finish signing in":"Email me a sign-in link"}</button></p></form><p class="small" id="si-msg">${msg||""}</p>`)}
+gateEl.addEventListener("submit",e=>{e.preventDefault();const f=e.target,email=$("#si-email").value.trim().toLowerCase(),m=t=>{$("#si-msg").textContent=t};if(!email){m("Enter your email first.");return}
+  if(f.dataset.link){finishLink(email);return}
+  auth.sendSignInLinkToEmail(email,{url:location.origin+location.pathname,handleCodeInApp:true}).then(()=>{try{localStorage.setItem("tcs-email",email)}catch(x){}m("Sent. Look for a message from noreply@country-school-visit.firebaseapp.com (check spam) and open the link in this same browser.")},()=>m("The link could not be sent. Check the address and try again in a minute."))});
+gateEl.addEventListener("click",e=>{if(e.target.id==="so")auth.signOut()});
+$("#who").addEventListener("click",e=>{if(e.target.id==="so2")auth.signOut()});
+function finishLink(email){auth.signInWithEmailLink(email,location.href).then(()=>{try{localStorage.removeItem("tcs-email")}catch(x){}history.replaceState(null,"",location.pathname)},()=>signInForm("That link has expired or was already used. Ask for a new one.",false))}
+function start(){ if(started) return; started=true; banner("Loading the team\u2019s work\u2026");
+  const slow=setTimeout(()=>{if(!connected)banner("Saved work can\u2019t be reached yet. Anything you see may be out of date. Keep this tab open.")},10000);
+  const sub=(col,key)=>db.collection(col).onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{o[d.id]=d.data()});S[key]=o;
+    if(!snap.metadata.fromCache&&!connected){connected=true;clearTimeout(slow);banner("")}
+    refresh()},()=>{clearTimeout(slow);banner("The live connection stopped. Reload the page to reconnect.")});
+  sub("fields","fields");sub("items","items");sub("c_assign","assign");sub("c_plan","plan");sub("status","status");sub("prefs","prefs");
+}
+(function(){
+  if(!window.firebase){banner("The sign-in service did not load. Check your connection and reload.");return}
+  firebase.initializeApp(FB);auth=firebase.auth();db=firebase.firestore();
+  if(auth.isSignInWithEmailLink(location.href)){let em=null;try{em=localStorage.getItem("tcs-email")}catch(x){} if(em)finishLink(em);else signInForm("",true)}
+  auth.onAuthStateChanged(async u=>{
+    if(!u){ $("#who").textContent=""; if(!auth.isSignInWithEmailLink(location.href))signInForm(); return }
+    me=WHO[await sha((u.email||"").toLowerCase())]||null;
+    if(!me){gate(`<h2>Not on the team list</h2><p class="lede">${esc(u.email)} is not one of the five visiting team addresses. Sign out and use your school email, or contact the chair.</p><button id="so">Sign out</button>`);return}
+    isOwner=me==="cecee"; $("#who").innerHTML=`Signed in as ${TEAM[me].name} <button class="x" id="so2">Sign out</button>`;
+    gate("");render();start();
+  });
+})();
+</script>
+</body>
+</html>
